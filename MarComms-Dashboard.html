@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarComms Dashboard | Artera</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+
+        .month-selector {
+            background: #f8fafc;
+            padding: 20px 40px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .month-btn {
+            padding: 10px 24px;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #475569;
+            white-space: nowrap;
+        }
+
+        .month-btn:hover {
+            background: #f1f5f9;
+            border-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .month-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .month-view {
+            display: none;
+        }
+
+        .month-view.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 12px;
+            border-left: 4px solid #2563eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transform: translateX(4px);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: #2563eb;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .section-content {
+            color: #475569;
+            white-space: pre-wrap;
+            line-height: 1.8;
+        }
+
+        .section-content a {
+            color: #2563eb;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .section-content a:hover {
+            border-bottom-color: #2563eb;
+        }
+
+        .empty-state {
+            color: #94a3b8;
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2563eb;
+            display: block;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        footer {
+            background: #1e293b;
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        footer p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .brand-footer {
+            margin-top: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            background: linear-gradient(90deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+
+            header {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MarComms Dashboard</h1>
+            <p class="tagline">Experience by your side — Artera FY27 Marketing Communications Calendar</p>
+        </header>
+
+        <div class="month-selector">
+            <button class="month-btn" onclick="showMonth('feb')">February 2026</button>
+            <button class="month-btn active" onclick="showMonth('mar')">March 2026</button>
+            <button class="month-btn" onclick="showMonth('apr')">April 2026</button>
+            <button class="month-btn" onclick="showMonth('may')">May 2026</button>
+        </div>
+
+        <div class="content">
+            <!-- February 2026 -->
+            <div id="feb-view" class="month-view">
+                <div class="stats-bar">
+                    <div class="stat-card">
+                        <span class="stat-number">5</span>
+                        <div class="stat-label">Product Releases</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">1</span>
+                        <div class="stat-label">Major Events</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">2</span>
+                        <div class="stat-label">Press Mentions</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">15+</span>
+                        <div class="stat-label">Webinars & Training</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">🚀</div>
+                        Launches & Announcements
+                    </div>
+                    <div class="section-content">TBD: Outbound Agent Campaign
+
+Best in KLAS Press Release (2/27)
+
+Orthopedics Campaign
+
+Updated Brand Positioning Rollout
+
+Product Releases:
+- Updated Settings page - GA 02/18
+- Triggers Updates - GA 02/26
+
+Sales Landing Pages (AKDHC)</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">📅</div>
+                        Events: Tradeshows & Webinars
+                    </div>
+                    <div class="section-content"><a href="https://hlth.com/events/vive/" target="_blank">ViVE | 2/22 -2/25 | Los Angeles</a></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">💻</div>
+                        Digital (Website, Blog, Social)
+                    </div>
+                    <div class="section-content"><a href="https://artera.io/blog/best-in-klas/" target="_blank">Artera Named 2026 Best in KLAS for Patient Communication Software</a></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">📧</div>
+                        Customer Marketing Outreach
+                    </div>
+                    <div class="section-content">Artera Beat: User Customer Newsletter
+
+Artera Beat: Oracle Edition
+
+AI-Empowered Thoughtleadership Newsletter: All customers
+
+Feb CS Template Slides:
+- Jan Release Video
+- Upcoming Events: ViVE & HIMSS
+- Upcoming Webinars
+- Blog
+- Artera in the News</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">🎓</div>
+                        Customer Education & Advocacy
+                    </div>
+                    <div class="section-content">Customer Advocacy
+- G2 Campaign #2
+
+Webinars
+- 02/03: Thought Leadership: Fireside Chat with Jess Oveys - Patient Communication Leading Practices
+- 02:05: MEDITECH Triggers Overview
+- 02/10: Campaigns 101: Overview
+- 02/24: Campaigns 102: Leveraging Campaigns for Value
+- 02/25: Peer Connect Affinity Session: FQHC
+
+Knowledge Base
+- New Article: Recall Triggers Overview and Leading Practices
+- New Article: Inbound Message Triggers Overview and Leading Practices
+- New Article: Appointment Triggers Overview and Leading Practices
+
+Artera Academy
+- Enterprise & Practice Settings Enhancements
+- Triggers Filter Enhancements
+
+Implementation Resources
+- How to Write Articles Workshop
+
+Pendo
+- Announcement for Settings updates (available in Demo)
+- Announcement for Settings updates (available in Prod)
+- Guide for Settings update (Prod)
+- Announcement for Triggers updates (available in Demo)
+- Announcement for Triggers updates (available in Prod)</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">🏆</div>
+                        Corp Awards & Press Coverage
+                    </div>
+                    <div class="section-content"><a href="https://www.builtinla.com/articles/how-munchkin-and-artera-ship-ai-fast-without-compromising-safety-or-quality" target="_blank">Builtin LA Roundup Article: How Munchkin and Artera Ship AI Fast - Without Compromising Safety or Quality (2/3)</a>
+
+<a href="https://artera.io/news/artera-named-1-best-in-klas-2026/" target="_blank">Artera Named #1 Best in KLAS for Patient Communications (2/27)</a></div>
+                </div>
+            </div>
+
+            <!-- March 2026 -->
+            <div id="mar-view" class="month-view active">
+                <div class="stats-bar">
+                    <div class="stat-card">
+                        <span class="stat-number">3</span>
+                        <div class="stat-label">Product Releases</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">1</span>
+                        <div class="stat-label">Major Events</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">6</span>
+                        <div class="stat-label">Press Mentions</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">7</span>
+                        <div class="stat-label">Webinars</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">🚀</div>
+                        Launches & Announcements
+                    </div>
+                    <div class="section-content"><a href="https://artera.io/eleanor-health/" target="_blank">Sales Landing Page: Eleanor Health</a>
+
+Product Releases:
+- Final Triggers Transition
+- Admin Console Updates</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">📅</div>
+                        Events: Tradeshows & Webinars
+                    </div>
+                    <div class="section-content"><a href="https://www.himssconference.com" target="_blank">HiMSS | 3/9-3/12 | Las Vegas</a></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">💙</div>
+                        Customer Stories
+                    </div>
+                    <div class="section-content"><a href="https://artera.io/blog/how-uhs-partnered-with-artera-to-close-gaps-in-diabetes-care/" target="_blank">United Health Services - Closing Gaps in Diabetes Care</a>
+
+<a href="https://artera.io/news/atlantic-health-uses-arteras-ai-agents/" target="_blank">Atlantic Health Press Release - Colonoscopy AI Agents</a></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">💻</div>
+                        Digital (Website, Blog, Social)
+                    </div>
+                    <div class="section-content"><a href="https://artera.io/blog/mcp-for-healthcare/" target="_blank">MCP For Healthcare: 4 Hard-Won Lessons from the Trenches</a>
+
+<a href="https://artera.io/resource/agentic-ai-healthcare/" target="_blank">Decoding AI Agents for Healthcare Whitepaper (Landing Page)</a>
+
+<a href="https://artera.io/resource/agentic-ai-patient-care/" target="_blank">MedCity News Video: How Artera is Using Agentic AI to Humanize Patient Care</a>
+
+<a href="https://artera.io/blog/scaling-specialty-care-with-voice-ai/" target="_blank">Scaling Specialty Care with Voice AI: A HIMSS Recap</a>
+
+<a href="https://artera.io/blog/mcp-explained-himss26-fireside-chat/" target="_blank">MCP Explained: A HIMSS26 Fireside Chat Recap</a>
+
+<a href="https://artera.io/blog/ai-agents-for-patient-communications-himss-recap/" target="_blank">AI Agents for Patient Comms & Access: HIMSS26 Recap</a></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">📧</div>
+                        Customer Marketing Outreach
+                    </div>
+                    <div class="section-content">Artera Beat: User Customer Newsletter
+
+Artera Beat: Oracle Edition
+
+AI-Empowered Thoughtleadership Newsletter: All customers
+
+March CS Template Slides:
+- Feb Release Video
+- Upcoming Events: HIMSS
+- Upcoming Webinars
+- Blog
+- Artera in the News</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">🎓</div>
+                        Customer Education & Advocacy
+                    </div>
+                    <div class="section-content">Customer Advocacy
+- G2 Campaign #3 - Week of March 30th
+
+Webinars
+- 03/03: Artera | Orthopedics at Scale (Prospects & Customers)
+- 03/10: N/A (HIMSS)
+- 03/18: OCHIN Harmony Webinar
+- 03/19: Product Quarterly Webinar
+- 03/24: Messaging in Artera Webinar
+- 03/25: Peer Connect Affinity Session: Ortho Groups
+- 03/30: NJAMHAA Artera Overview Webinar
+
+Knowledge Base
+- Smart Inbox article updates to support enhancements
+
+Pendo
+- OCHIN Harmony Webinar Announcements
+- HIMSS Office Hours Announcement
+- Smart Inbox Enhancements | Demo Announcement
+
+Implementation Resources
+- New Conversation Flows Feature Gate Confluence Article</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">🏆</div>
+                        Corp Awards & Press Coverage
+                    </div>
+                    <div class="section-content">AI-Empowered Thoughtleadership Newsletter: All customers
+
+<a href="https://artera.io/news/artera-strengthens-executive-leadership-team/" target="_blank">Artera Strengthens Executive Leadership Team with Appointment of New CTO and Promotion of People Team Leader (3/26)</a>
+
+<a href="https://artera.io/news/himss-2026-artera-moves-beyond-agentic-ai-hype/" target="_blank">HIMSS 2026: Artera to Showcase Real-World Applications of AI for Patient Communications and Access (3/6)</a>
+
+<a href="https://hitconsultant.net/2026/03/30/atlantic-health-deploy-arteras-ai-agents-for-colonoscopy-patient-outreach/" target="_blank">Atlantic Health to Deploy Artera's AI Agents for Colonoscopy Patient Outreach (3/30)</a>
+
+<a href="https://www.hpnonline.com/healthcare-it/news/55367444/atlantic-health-partners-with-artera-to-improve-colonoscopy-outreach" target="_blank">Atlantic Health Partners with Artera to Improve Colonoscopy Outreach (3/30)</a>
+
+<a href="https://www.beckershospitalreview.com/healthcare-information-technology/atlantic-health-taps-arteras-ai-agents-to-close-gaps-in-colonoscopy-care/" target="_blank">Atlantic Health Taps Artera's AI Agents to Close Gaps in Colonoscopy Care (3/30)</a>
+
+<a href="https://www.sliceofhealthcare.com/atlantic-health-expands-colonoscopy-prep-with-ai" target="_blank">Atlantic Health Expands Colonoscopy Prep With AI (3/30)</a></div>
+                </div>
+            </div>
+
+            <!-- April 2026 -->
+            <div id="apr-view" class="month-view">
+                <div class="stats-bar">
+                    <div class="stat-card">
+                        <span class="stat-number">2</span>
+                        <div class="stat-label">Product Releases</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">1</span>
+                        <div class="stat-label">Major Events</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">2</span>
+                        <div class="stat-label">Customer Stories</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">4</span>
+                        <div class="stat-label">Webinars</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">🚀</div>
+                        Launches & Announcements
+                    </div>
+                    <div class="section-content">Product Releases:
+- Smart Inbox Updates
+- Campaign Variables</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">📅</div>
+                        Events: Tradeshows & Webinars
+                    </div>
+                    <div class="section-content"><a href="https://s4.goeshow.com/aaoe/annual/2026/index.cfm" target="_blank">AAOE | 4/20-4/22 | Louisville, KY</a></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">💙</div>
+                        Customer Stories
+                    </div>
+                    <div class="section-content">Eisenhower
+
+Tri State Orthopedics</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">💻</div>
+                        Digital (Website, Blog, Social)
+                    </div>
+                    <div class="section-content"><a href="https://artera.io/blog/critical-factors-for-building-a-scalable-digital-workforce/" target="_blank">3 Critical Factors for Building a Scalable Digital Workforce</a></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">📧</div>
+                        Customer Marketing Outreach
+                    </div>
+                    <div class="section-content">Artera Beat: User Customer Newsletter
+
+Artera Beat: Oracle Edition
+
+AI-Empowered Thoughtleadership Newsletter: All customers
+
+April CS Template Slides:
+- March Release Video
+- Upcoming Events: AAOE
+- Upcoming Webinars
+- Blog
+- Artera in the News</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">🎓</div>
+                        Customer Education & Advocacy
+                    </div>
+                    <div class="section-content">Customer Advocacy
+- G2 Campaign #3 - Continued
+- WIP: Reference Process Reboot
+
+Knowledge Base
+- Knowledge Base Article updates to support Smart Inbox enhancements
+- New Article: Campaign Variables
+- New Article: SMS Carrier Compliance Requirements
+
+Webinars
+- 04/07: Education Office Hours
+- 04/14: Smart Inbox Overview
+- 04/21: Artera's AI Agents
+- 04/28: Peer Connect Affinity Session: Peds Groups
+
+Pendo
+- Smart Inbox Enhancements | Demo Announcement
+- Smart Inbox Enhancements | Prod Announcement
+- Smart Inbox Enhancements | Pop Up Guide (Prod)
+- Smart Inbox Enhancements | Pop Up Guide (Prod, MEDITECH only)
+
+Artera Academy
+- Smart Inbox Enhancements
+
+Implementation Resources
+- Implementation Resources & Process Updates FY27 Q1
+- Product Certification Updates to support Smart Inbox Enhancements
+- Implementation Resource Updates to support Smart Inbox Enhancements
+- New Admin Console Confluence Articles
+- New Carrier Compliance Implementation Resources</div>
+                </div>
+            </div>
+
+            <!-- May 2026 -->
+            <div id="may-view" class="month-view">
+                <div class="stats-bar">
+                    <div class="stat-card">
+                        <span class="stat-number">1</span>
+                        <div class="stat-label">Product Releases</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">1</span>
+                        <div class="stat-label">Major Events</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">5</span>
+                        <div class="stat-label">Webinars</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">-</span>
+                        <div class="stat-label">Press Mentions</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">🚀</div>
+                        Launches & Announcements
+                    </div>
+                    <div class="section-content">Product Releases:
+- Campaign Variables</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">📅</div>
+                        Events: Tradeshows & Webinars
+                    </div>
+                    <div class="section-content"><a href="https://www.ochinlearningforum.org/event/f7e3d7a0-a263-41bb-b1cb-5ebe3730d88e/home" target="_blank">OCHIN | 5/11-5/14 | New Orleans, LA</a></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">📧</div>
+                        Customer Marketing Outreach
+                    </div>
+                    <div class="section-content">Artera Beat: User Customer Newsletter
+
+Artera Beat: Oracle Edition
+
+AI-Empowered Thoughtleadership Newsletter: All customers
+
+April CS Template Slides:
+- March Release Video
+- Upcoming Events: OCHIN
+- Upcoming Webinars
+- Blog
+- Artera in the News</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <div class="section-icon">🎓</div>
+                        Customer Education & Advocacy
+                    </div>
+                    <div class="section-content">Webinars
+- 05/05: New to Artera: End Users 101
+- 05/12: New to Artera: End Users 102
+- 05/19: Campaigns 101: Overview
+- 05/20: Peer Connect Affinity Session: FQHCs
+- 05/27: Customer Spotlight: Atlantic Health?
+
+Knowledge Base
+- Knowledge Base Article updates to support Smart Inbox enhancements
+
+Artera Academy
+- Campaigns Course Enhancements
+- Community Outreach Course Enhancements
+- Lines & Resources Course changes to Support ServiceNow Migration
+
+Implementation Resources
+- Surgical Cases Internal Enablement Playbook
+- Surgical Cases Implementation Guide
+- Implementation Resource changes to Support ServiceNow Migration</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Artera MarComms Dashboard | FY27 Calendar</p>
+            <p class="brand-footer">Experience by your side</p>
+        </footer>
+    </div>
+
+    <script>
+        function showMonth(month) {
+            // Hide all month views
+            document.querySelectorAll('.month-view').forEach(view => {
+                view.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.month-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected month
+            document.getElementById(month + '-view').classList.add('active');
+
+            // Highlight active button
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
